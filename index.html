@@ -191,40 +191,42 @@ function datenAusFormularenSpeichern() {
       window.scrollTo(0, document.body.scrollHeight);
     }
 
-    function finaleMailAbschicken() {
-      const zeit = document.getElementById('zeit').value;
-      const Ereignis = document.getElementById('Ereignis').value;
-      const datum = document.getElementById('datum').value;
+function finaleMailAbschicken() {
+  const datum = document.getElementById('datum').value;      // Datum aus Zusatzmaske
+  const zeit = document.getElementById('zeit').value;        // Zeit aus Zusatzmaske
+  const ereignis = document.getElementById('ereignis').value; // Ereignis aus Zusatzmaske
 
-      const empfaenger = "wueest.marc@bluewin.ch"; // <- Anpassen
-      const betreff = "Erfasste Personendaten inkl. Ereignis";
+  const empfaenger = "wueest.marc@bluewin.ch";
 
-      let mailBody = `Datum: ${datum}\nZeit: ${zeit}\nEreignis: ${Ereignis}\n\nErfasste Personen:\n\n`;
+  // Betreff enthält jetzt Datum + Ereignis
+  const betreff = `Personendaten ${datum} - ${ereignis}`;
 
-      alleDaten.forEach((person, index) => {
-        mailBody += `Person ${index + 1}:\n`;
-        mailBody += `Vorname: ${person.vorname}\n`;
-        mailBody += `Nachname: ${person.nachname}\n`;
-        mailBody += `Geburtsdatum: ${person.geburtsdatum}\n`;
+  let mailBody = `Datum: ${datum}\nZeit: ${zeit}\nEreignis: ${ereignis}\n\nErfasste Personen:\n\n`;
 
-        if (person.hatZusatz) {
-          mailBody += `\n--- Weitere Angaben ---\n`;
-          mailBody += `Strasse: ${person.strasse}\n`;
-          mailBody += `PLZ: ${person.plz}\n`;
-          mailBody += `Ort: ${person.ort}\n`;
-          mailBody += `Vater: ${person.vater_vorname} ${person.vater_nachname}\n`;
-          mailBody += `Mutter: ${person.mutter_vorname} ${person.mutter_nachname}\n`;
-          mailBody += `Geburtsort: ${person.geburtsort}\n`;
-          mailBody += `Heimatort: ${person.heimatort}\n`;
-        }
+  alleDaten.forEach((person, index) => {
+    mailBody += `Person ${index + 1}:\n`;
+    mailBody += `Vorname: ${person.vorname}\n`;
+    mailBody += `Nachname: ${person.nachname}\n`;
+    mailBody += `Geburtsdatum: ${person.geburtsdatum}\n`;
 
-        mailBody += `Beruf: ${person.beruf}\n`;
-        mailBody += `Telefonnummer: ${person.telefonnummer}\n\n`;
-      });
-
-      const mailtoLink = `mailto:${empfaenger}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(mailBody)}`;
-      window.location.href = mailtoLink;
+    if (person.hatZusatz) {
+      mailBody += `\n--- Weitere Angaben ---\n`;
+      mailBody += `Strasse: ${person.strasse}\n`;
+      mailBody += `PLZ: ${person.plz}\n`;
+      mailBody += `Ort: ${person.ort}\n`;
+      mailBody += `Vater: ${person.vater_vorname} ${person.vater_nachname}\n`;
+      mailBody += `Mutter: ${person.mutter_vorname} ${person.mutter_nachname}\n`;
+      mailBody += `Geburtsort: ${person.geburtsort}\n`;
+      mailBody += `Heimatort: ${person.heimatort}\n`;
     }
+
+    mailBody += `Beruf: ${person.beruf}\n`;
+    mailBody += `Telefonnummer: ${person.telefonnummer}\n\n`;
+  });
+
+  const mailtoLink = `mailto:${empfaenger}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(mailBody)}`;
+  window.location.href = mailtoLink;
+}
   </script>
 
 </body>
