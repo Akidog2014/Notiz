@@ -1,66 +1,236 @@
-function zeigeZusatzMaske() {
-  datenAusFormularenSpeichern();
-  const heute = new Date().toISOString().split('T')[0];
-  document.getElementById('datum').value = heute;
-
-  // Versuche, die Geokoordinaten zu ermitteln
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        document.getElementById('breite').value = position.coords.latitude.toFixed(6);
-        document.getElementById('laenge').value = position.coords.longitude.toFixed(6);
-        document.getElementById('zusatzMaske').style.display = 'block';
-        window.scrollTo(0, document.body.scrollHeight);
-      },
-      (error) => {
-        alert("Standort konnte nicht ermittelt werden: " + error.message);
-        document.getElementById('zusatzMaske').style.display = 'block';
-        window.scrollTo(0, document.body.scrollHeight);
-      }
-    );
-  } else {
-    alert("Geolocation wird von diesem Browser nicht unterstützt.");
-    document.getElementById('zusatzMaske').style.display = 'block';
-    window.scrollTo(0, document.body.scrollHeight);
-  }
-}
-
-function finaleMailAbschicken() {
-  const zeit = document.getElementById('zeit').value;
-  const objekt = document.getElementById('objekt').value;
-  const datum = document.getElementById('datum').value;
-  const breite = document.getElementById('breite').value;
-  const laenge = document.getElementById('laenge').value;
-
-  const empfaenger = "wueest.marc@bluewin.ch"; // <- Anpassen
-  const betreff = "Erfasste Personendaten inkl. Objekt und Koordinaten";
-
-  let mailBody = `Datum: ${datum}\nZeit: ${zeit}\nObjekt: ${objekt}\n`;
-  mailBody += `Breitengrad: ${breite}\nLängengrad: ${laenge}\n\n`;
-  mailBody += `Erfasste Personen:\n\n`;
-
-  alleDaten.forEach((person, index) => {
-    mailBody += `Person ${index + 1}:\n`;
-    mailBody += `Vorname: ${person.vorname}\n`;
-    mailBody += `Nachname: ${person.nachname}\n`;
-    mailBody += `Geburtsdatum: ${person.geburtsdatum}\n`;
-
-    if (person.hatZusatz) {
-      mailBody += `\n--- Weitere Angaben ---\n`;
-      mailBody += `Strasse: ${person.strasse}\n`;
-      mailBody += `PLZ: ${person.plz}\n`;
-      mailBody += `Ort: ${person.ort}\n`;
-      mailBody += `Vater: ${person.vater_vorname} ${person.vater_nachname}\n`;
-      mailBody += `Mutter: ${person.mutter_vorname} ${person.mutter_nachname}\n`;
-      mailBody += `Geburtsort: ${person.geburtsort}\n`;
-      mailBody += `Heimatort: ${person.heimatort}\n`;
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personenerfassung</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      padding: 0;
+      background-color: #f9f9f9;
     }
 
-    mailBody += `\nArbeitgeber: ${person.arbeitgeber}\n`;
-    mailBody += `Beruf: ${person.beruf}\n`;
-    mailBody += `Telefonnummer: ${person.telefonnummer}\n\n`;
-  });
+    .person-form, .zusatz-maske {
+      border: 1px solid #ccc;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      background-color: #fff;
+    }
 
-  const mailtoLink = `mailto:${empfaenger}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(mailBody)}`;
-  window.location.href = mailtoLink;
-}
+    h1, h3 {
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      box-sizing: border-box;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      margin-top: 5px;
+    }
+
+    button {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      margin-top: 15px;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .zusatzfelder {
+      margin-top: 10px;
+      padding: 10px;
+      border-left: 3px solid #007bff;
+      background-color: #f1f8ff;
+      border-radius: 5px;
+      display: none;
+    }
+
+    @media (min-width: 600px) {
+      .person-form, .zusatz-maske {
+        max-width: 600px;
+        margin: 0 auto 20px auto;
+      }
+
+      button {
+        max-width: 600px;
+        margin: 20px auto;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Kontroll Personalienblatt</h1>
+
+  <div id="formContainer">
+    <!-- Formulare werden hier eingefügt -->
+  </div>
+
+  <button onclick="weiter()">➕ Neue Person hinzufügen</button>
+  <button onclick="zeigeZusatzMaske()">📤 Abschicken (Mail senden)</button>
+
+  <!-- Zusätzliche Maske nach "Abschicken" -->
+  <div id="zusatzMaske" class="zusatz-maske" style="display: none;">
+    <h3>Zusätzliche Informationen</h3>
+    <label>Aktuelles Datum: <input type="text" id="datum" readonly></label>
+    <label>Zeit: <input type="time" id="zeit"></label>
+    <label>Objekt: <input type="text" id="objekt" placeholder="z. B. Projektname, Adresse..."></label>
+    <button onclick="finaleMailAbschicken()">✅ Jetzt wirklich abschicken</button>
+  </div>
+
+  <script>
+    const alleDaten = [];
+    let formIndex = 0;
+
+    function neuesFormular() {
+      const container = document.getElementById('formContainer');
+
+      const div = document.createElement('div');
+      div.className = 'person-form';
+      div.innerHTML = `
+        <h3>Person ${formIndex + 1}</h3>
+        <label>Vorname:<input type="text" name="vorname" placeholder="Vorname eingeben" required></label>
+        <label>Nachname:<input type="text" name="nachname" placeholder="Nachname eingeben" required></label>
+        <label>Geburtsdatum:<input type="date" name="geburtsdatum" required></label>
+
+        <button type="button" class="weitere-angaben-btn" onclick="zeigeWeitereAngaben(this)">
+          ➕ Noch nicht erfasst im myAbi!
+        </button>
+
+        <div class="zusatzfelder">
+          <label>Strasse:<input type="text" name="strasse" placeholder="z. B. Musterweg 12"></label>
+          <label>PLZ:<input type="text" name="plz" placeholder="z. B. 8000"></label>
+          <label>Ort:<input type="text" name="ort" placeholder="z. B. Zürich"></label>
+          <label>Vorname Vater:<input type="text" name="vater_vorname" placeholder="Vorname des Vaters"></label>
+          <label>Nachname Vater:<input type="text" name="vater_nachname" placeholder="Nachname des Vaters"></label>
+          <label>Vorname Mutter:<input type="text" name="mutter_vorname" placeholder="Vorname der Mutter"></label>
+          <label>Nachname Mutter:<input type="text" name="mutter_nachname" placeholder="Nachname der Mutter"></label>
+          <label>Geburtsort:<input type="text" name="geburtsort" placeholder="z. B. Bern"></label>
+          <label>Heimatort:<input type="text" name="heimatort" placeholder="z. B. Basel"></label>
+        </div>
+
+        <label>Arbeitgeber:<input type="text" name="arbeitgeber" placeholder="Firma" required></label>
+        <label>Beruf:<input type="text" name="beruf" placeholder="Berufsbezeichnung" required></label>
+        <label>Telefonnummer:<input type="tel" name="telefonnummer" placeholder="+41 79 123 45 67" inputmode="tel" required></label>
+      `;
+      container.appendChild(div);
+      formIndex++;
+    }
+
+    // Klick auf "Weitere Angaben erfassen!"
+    function zeigeWeitereAngaben(button) {
+      const form = button.closest('.person-form');
+      const zusatzfelder = form.querySelector('.zusatzfelder');
+      zusatzfelder.style.display = 'block';
+      button.style.display = 'none'; // Button ausblenden, wenn Zusatzfelder sichtbar sind
+    }
+
+    // Erste Maske laden
+    neuesFormular();
+
+    function weiter() {
+      datenAusFormularenSpeichern();
+      neuesFormular();
+      window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function datenAusFormularenSpeichern() {
+      const container = document.getElementById('formContainer');
+      const forms = container.getElementsByClassName('person-form');
+
+      alleDaten.length = 0;
+
+      for (const form of forms) {
+        const hatZusatz = form.querySelector('.zusatzfelder').style.display === 'block';
+        const daten = {
+          vorname: form.querySelector('input[name="vorname"]').value,
+          nachname: form.querySelector('input[name="nachname"]').value,
+          geburtsdatum: form.querySelector('input[name="geburtsdatum"]').value,
+          arbeitgeber: form.querySelector('input[name="arbeitgeber"]').value,
+          beruf: form.querySelector('input[name="beruf"]').value,
+          telefonnummer: form.querySelector('input[name="telefonnummer"]').value,
+          hatZusatz: hatZusatz,
+          strasse: form.querySelector('input[name="strasse"]')?.value || "",
+          plz: form.querySelector('input[name="plz"]')?.value || "",
+          ort: form.querySelector('input[name="ort"]')?.value || "",
+          vater_vorname: form.querySelector('input[name="vater_vorname"]')?.value || "",
+          vater_nachname: form.querySelector('input[name="vater_nachname"]')?.value || "",
+          mutter_vorname: form.querySelector('input[name="mutter_vorname"]')?.value || "",
+          mutter_nachname: form.querySelector('input[name="mutter_nachname"]')?.value || "",
+          geburtsort: form.querySelector('input[name="geburtsort"]')?.value || "",
+          heimatort: form.querySelector('input[name="heimatort"]')?.value || "",
+        };
+        alleDaten.push(daten);
+      }
+    }
+
+    function zeigeZusatzMaske() {
+      datenAusFormularenSpeichern();
+      const heute = new Date().toISOString().split('T')[0];
+      document.getElementById('datum').value = heute;
+      document.getElementById('zusatzMaske').style.display = 'block';
+      window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function finaleMailAbschicken() {
+      const zeit = document.getElementById('zeit').value;
+      const objekt = document.getElementById('objekt').value;
+      const datum = document.getElementById('datum').value;
+
+      const empfaenger = "wueest.marc@bluewin.ch"; // <- Anpassen
+      const betreff = "Erfasste Personendaten inkl. Objekt";
+
+      let mailBody = `Datum: ${datum}\nZeit: ${zeit}\nObjekt: ${objekt}\n\nErfasste Personen:\n\n`;
+
+      alleDaten.forEach((person, index) => {
+        mailBody += `Person ${index + 1}:\n`;
+        mailBody += `Vorname: ${person.vorname}\n`;
+        mailBody += `Nachname: ${person.nachname}\n`;
+        mailBody += `Geburtsdatum: ${person.geburtsdatum}\n`;
+
+        if (person.hatZusatz) {
+          mailBody += `\n--- Weitere Angaben ---\n`;
+          mailBody += `Strasse: ${person.strasse}\n`;
+          mailBody += `PLZ: ${person.plz}\n`;
+          mailBody += `Ort: ${person.ort}\n`;
+          mailBody += `Vater: ${person.vater_vorname} ${person.vater_nachname}\n`;
+          mailBody += `Mutter: ${person.mutter_vorname} ${person.mutter_nachname}\n`;
+          mailBody += `Geburtsort: ${person.geburtsort}\n`;
+          mailBody += `Heimatort: ${person.heimatort}\n`;
+        }
+
+        mailBody += `\nArbeitgeber: ${person.arbeitgeber}\n`;
+        mailBody += `Beruf: ${person.beruf}\n`;
+        mailBody += `Telefonnummer: ${person.telefonnummer}\n\n`;
+      });
+
+      const mailtoLink = `mailto:${empfaenger}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(mailBody)}`;
+      window.location.href = mailtoLink;
+    }
+  </script>
+
+</body>
+</html>
+
+
