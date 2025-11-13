@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Foto-Formular</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    form {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 400px;
+      margin: auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input, button {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    button {
+      background-color: #007AFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005BBB;
+    }
+  </style>
+</head>
+<body>
+  <h2>Foto-Formular</h2>
+  <form id="fotoForm">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" required>
+
+    <label for="telefon">Telefonnummer:</label>
+    <input type="tel" id="telefon" name="telefon" required>
+
+    <label for="foto">Foto aufnehmen oder auswählen:</label>
+    <input type="file" id="foto" name="foto" accept="image/*" capture="environment">
+
+    <button type="button" onclick="senden()">Senden</button>
+  </form>
+
+  <script>
+    function senden() {
+      const name = document.getElementById('name').value;
+      const telefon = document.getElementById('telefon').value;
+      const fotoInput = document.getElementById('foto');
+      const email = "zielperson@example.com"; // <<-- Hier deine Zieladresse eintragen
+
+      if (!name || !telefon) {
+        alert("Bitte Name und Telefonnummer ausfüllen.");
+        return;
+      }
+
+      if (fotoInput.files.length === 0) {
+        alert("Bitte ein Foto auswählen oder aufnehmen.");
+        return;
+      }
+
+      // Da man aus einem Browser direkt kein Foto mit Anhang per Mail versenden kann,
+      // öffnet dieses Skript den Mailclient mit den Feldern vorausgefüllt:
+      const subject = encodeURIComponent("Neues Foto-Formular");
+      const body = encodeURIComponent(`Name: ${name}\nTelefon: ${telefon}\n\nDas Foto ist im Anhang oder bitte separat senden.`);
+      window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+    }
+  </script>
+</body>
+</html>
