@@ -95,7 +95,7 @@
     <h3>Zusätzliche Informationen</h3>
     <label>Aktuelles Datum: <input type="text" id="datum" readonly></label>
     <label>Zeit: <input type="time" id="zeit"></label>
-    <label>Ereignis: <input type="text" id="Ereignis"></label>
+    <label>ereignis: <input type="text" id="ereignis"></label>
     <button onclick="finaleMailAbschicken()">✅ Jetzt wirklich abschicken</button>
   </div>
 
@@ -194,14 +194,14 @@ function datenAusFormularenSpeichern() {
 function finaleMailAbschicken() {
   const datum = document.getElementById('datum').value;      // Datum aus Zusatzmaske
   const zeit = document.getElementById('zeit').value;        // Zeit aus Zusatzmaske
-  const ereignis = document.getElementById('ereignis').value; // Ereignis aus Zusatzmaske
+  const ereignis = document.getElementById('ereignis').value; // ereignis aus Zusatzmaske
 
   const empfaenger = "wueest.marc@bluewin.ch";
 
-  // Betreff enthält jetzt Datum + Ereignis
+  // Betreff enthält jetzt Datum + ereignis
   const betreff = `Personendaten ${datum} - ${ereignis}`;
 
-  let mailBody = `Datum: ${datum}\nZeit: ${zeit}\nEreignis: ${ereignis}\n\nErfasste Personen:\n\n`;
+  let mailBody = `Datum: ${datum}\nZeit: ${zeit}\nereignis: ${ereignis}\n\nErfasste Personen:\n\n`;
 
   alleDaten.forEach((person, index) => {
     mailBody += `Person ${index + 1}:\n`;
