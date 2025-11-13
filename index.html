@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kontakt-Formular</title>
+  <title>Kontakt-Formular mit Standort</title>
   <style>
     body {
       font-family: sans-serif;
@@ -64,9 +64,33 @@
         return;
       }
 
-      const subject = encodeURIComponent("Neues Kontaktformular");
-      const body = encodeURIComponent(`Name: ${name}\nTelefon: ${telefon}`);
-      window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const lat = position.coords.latitude.toFixed(6);
+            const lon = position.coords.longitude.toFixed(6);
+            const accuracy = position.coords.accuracy.toFixed(1);
+
+            const subject = encodeURIComponent("Neues Kontaktformular mit Standort");
+            const body = encodeURIComponent(
+              `Name: ${name}\nTelefon: ${telefon}\n\nStandortdaten:\nBreite: ${lat}\nLänge: ${lon}\nGenauigkeit: ±${accuracy}m`
+            );
+
+            window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+          },
+          (error) => {
+            alert("Standort konnte nicht ermittelt werden (evtl. verweigert). E-Mail wird ohne Standort gesendet.");
+            const subject = encodeURIComponent("Neues Kontaktformular (ohne Standort)");
+            const body = encodeURIComponent(`Name: ${name}\nTelefon: ${telefon}`);
+            window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+          }
+        );
+      } else {
+        alert("GPS wird von diesem Gerät nicht unterstützt.");
+        const subject = encodeURIComponent("Neues Kontaktformular (ohne Standort)");
+        const body = encodeURIComponent(`Name: ${name}\nTelefon: ${telefon}`);
+        window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+      }
     }
   </script>
 </body>
