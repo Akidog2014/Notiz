@@ -110,8 +110,8 @@
       div.className = 'person-form';
       div.innerHTML = `
         <h3>Person ${formIndex + 1}</h3>
-        <label>Vorname:<input type="text" name="vorname" placeholder="Vorname eingeben" required></label>
         <label>Nachname:<input type="text" name="nachname" placeholder="Nachname eingeben" required></label>
+        <label>Vorname:<input type="text" name="vorname" placeholder="Vorname eingeben" required></label>
         <label>Geburtsdatum: <input type="text" name="geburtsdatum" placeholder="DD.MM.JJJJ" inputmode="numeric" required oninput="formatDate(event)"></label>
 
         <button type="button" class="weitere-angaben-btn" onclick="zeigeWeitereAngaben(this)">
