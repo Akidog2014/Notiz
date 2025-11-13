@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kontakt-Formular mit Standort</title>
+  <title>Kontakt-Formular mit Standortanzeige</title>
   <style>
     body {
       font-family: sans-serif;
@@ -39,6 +39,15 @@
     button:hover {
       background-color: #005BBB;
     }
+    #gpsDaten {
+      margin-top: 15px;
+      padding: 10px;
+      background: #f0f8ff;
+      border-radius: 5px;
+      font-size: 14px;
+      color: #333;
+      display: none; /* wird erst sichtbar, wenn Daten da sind */
+    }
   </style>
 </head>
 <body>
@@ -50,10 +59,46 @@
     <label for="telefon">Telefonnummer:</label>
     <input type="tel" id="telefon" name="telefon" required>
 
+    <div id="gpsDaten">
+      <strong>Standortdaten:</strong><br>
+      Breite: <span id="lat"></span><br>
+      Länge: <span id="lon"></span><br>
+      Genauigkeit: ±<span id="acc"></span> m
+    </div>
+
     <button type="button" onclick="senden()">Senden</button>
   </form>
 
   <script>
+    let aktuelleKoordinaten = null; // wird später mit GPS-Daten gefüllt
+
+    // --- GPS-Daten automatisch beim Laden abrufen ---
+    window.onload = function() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const lat = position.coords.latitude.toFixed(6);
+            const lon = position.coords.longitude.toFixed(6);
+            const acc = position.coords.accuracy.toFixed(1);
+
+            aktuelleKoordinaten = { lat, lon, acc };
+
+            // Daten im Formular anzeigen
+            document.getElementById("lat").textContent = lat;
+            document.getElementById("lon").textContent = lon;
+            document.getElementById("acc").textContent = acc;
+            document.getElementById("gpsDaten").style.display = "block";
+          },
+          (error) => {
+            console.warn("Standort konnte nicht ermittelt werden:", error);
+          }
+        );
+      } else {
+        console.warn("Dieses Gerät unterstützt keine Standortabfrage.");
+      }
+    };
+
+    // --- Senden-Funktion ---
     function senden() {
       const name = document.getElementById('name').value;
       const telefon = document.getElementById('telefon').value;
@@ -64,33 +109,18 @@
         return;
       }
 
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const lat = position.coords.latitude.toFixed(6);
-            const lon = position.coords.longitude.toFixed(6);
-            const accuracy = position.coords.accuracy.toFixed(1);
+      let body = `Name: ${name}\nTelefon: ${telefon}`;
 
-            const subject = encodeURIComponent("Neues Kontaktformular mit Standort");
-            const body = encodeURIComponent(
-              `Name: ${name}\nTelefon: ${telefon}\n\nStandortdaten:\nBreite: ${lat}\nLänge: ${lon}\nGenauigkeit: ±${accuracy}m`
-            );
-
-            window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
-          },
-          (error) => {
-            alert("Standort konnte nicht ermittelt werden (evtl. verweigert). E-Mail wird ohne Standort gesendet.");
-            const subject = encodeURIComponent("Neues Kontaktformular (ohne Standort)");
-            const body = encodeURIComponent(`Name: ${name}\nTelefon: ${telefon}`);
-            window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
-          }
-        );
+      if (aktuelleKoordinaten) {
+        body += `\n\nStandortdaten:\nBreite: ${aktuelleKoordinaten.lat}\nLänge: ${aktuelleKoordinaten.lon}\nGenauigkeit: ±${aktuelleKoordinaten.acc} m`;
       } else {
-        alert("GPS wird von diesem Gerät nicht unterstützt.");
-        const subject = encodeURIComponent("Neues Kontaktformular (ohne Standort)");
-        const body = encodeURIComponent(`Name: ${name}\nTelefon: ${telefon}`);
-        window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+        body += `\n\n(Standort nicht verfügbar oder nicht freigegeben.)`;
       }
+
+      const subject = encodeURIComponent("Neues Kontaktformular mit Standort");
+      const mailBody = encodeURIComponent(body);
+
+      window.location.href = `mailto:${email}?subject=${subject}&body=${mailBody}`;
     }
   </script>
 </body>
