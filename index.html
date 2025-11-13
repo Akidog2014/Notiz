@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Foto-Formular</title>
+  <title>Kontakt-Formular</title>
   <style>
     body {
       font-family: sans-serif;
@@ -42,16 +42,13 @@
   </style>
 </head>
 <body>
-  <h2>Foto-Formular</h2>
-  <form id="fotoForm">
+  <h2>Kontakt-Formular</h2>
+  <form id="kontaktForm">
     <label for="name">Name:</label>
     <input type="text" id="name" name="name" required>
 
     <label for="telefon">Telefonnummer:</label>
     <input type="tel" id="telefon" name="telefon" required>
-
-    <label for="foto">Optional: Foto aufnehmen oder auswählen:</label>
-    <input type="file" id="foto" name="foto" accept="image/*" capture="environment">
 
     <button type="button" onclick="senden()">Senden</button>
   </form>
@@ -67,9 +64,8 @@
         return;
       }
 
-      // Kein Foto erforderlich
-      const subject = encodeURIComponent("Neues Formular (ohne Foto-Pflicht)");
-      const body = encodeURIComponent(`Name: ${name}\nTelefon: ${telefon}\n\n(Optional: Ein Foto kann separat gesendet werden.)`);
+      const subject = encodeURIComponent("Neues Kontaktformular");
+      const body = encodeURIComponent(`Name: ${name}\nTelefon: ${telefon}`);
       window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
     }
   </script>
