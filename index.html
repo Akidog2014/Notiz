@@ -50,7 +50,7 @@
     <label for="telefon">Telefonnummer:</label>
     <input type="tel" id="telefon" name="telefon" required>
 
-    <label for="foto">Foto aufnehmen oder auswählen:</label>
+    <label for="foto">Optional: Foto aufnehmen oder auswählen:</label>
     <input type="file" id="foto" name="foto" accept="image/*" capture="environment">
 
     <button type="button" onclick="senden()">Senden</button>
@@ -60,7 +60,6 @@
     function senden() {
       const name = document.getElementById('name').value;
       const telefon = document.getElementById('telefon').value;
-      const fotoInput = document.getElementById('foto');
       const email = "zielperson@example.com"; // <<-- Hier deine Zieladresse eintragen
 
       if (!name || !telefon) {
@@ -68,15 +67,9 @@
         return;
       }
 
-      if (fotoInput.files.length === 0) {
-        alert("Bitte ein Foto auswählen oder aufnehmen.");
-        return;
-      }
-
-      // Da man aus einem Browser direkt kein Foto mit Anhang per Mail versenden kann,
-      // öffnet dieses Skript den Mailclient mit den Feldern vorausgefüllt:
-      const subject = encodeURIComponent("Neues Foto-Formular");
-      const body = encodeURIComponent(`Name: ${name}\nTelefon: ${telefon}\n\nDas Foto ist im Anhang oder bitte separat senden.`);
+      // Kein Foto erforderlich
+      const subject = encodeURIComponent("Neues Formular (ohne Foto-Pflicht)");
+      const body = encodeURIComponent(`Name: ${name}\nTelefon: ${telefon}\n\n(Optional: Ein Foto kann separat gesendet werden.)`);
       window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
     }
   </script>
