@@ -95,7 +95,7 @@
     <h3>Zusätzliche Informationen</h3>
     <label>Aktuelles Datum: <input type="text" id="datum" readonly></label>
     <label>Zeit: <input type="time" id="zeit"></label>
-    <label>Objekt: <input type="text" id="objekt" placeholder="z. B. Projektname, Adresse..."></label>
+    <label>Ereignis: <input type="text" id="ereignis"></label>
     <button onclick="finaleMailAbschicken()">✅ Jetzt wirklich abschicken</button>
   </div>
 
@@ -128,10 +128,9 @@
           <label>Nachname Mutter:<input type="text" name="mutter_nachname" placeholder="Nachname der Mutter"></label>
           <label>Geburtsort:<input type="text" name="geburtsort" placeholder="z. B. Bern"></label>
           <label>Heimatort:<input type="text" name="heimatort" placeholder="z. B. Basel"></label>
+          <label>Beruf:<input type="text" name="beruf"></label>
         </div>
 
-        <label>Ereignis:<input type="text" name="Ereignis" placeholder="Firma" required></label>
-        <label>Beruf:<input type="text" name="beruf" placeholder="Berufsbezeichnung" required></label>
         <label>Telefonnummer:<input type="tel" name="telefonnummer" placeholder="+41 79 123 45 67" inputmode="tel" required></label>
       `;
       container.appendChild(div);
@@ -195,13 +194,13 @@
 
     function finaleMailAbschicken() {
       const zeit = document.getElementById('zeit').value;
-      const objekt = document.getElementById('objekt').value;
+      const ereignis = document.getElementById('ereignis').value;
       const datum = document.getElementById('datum').value;
 
       const empfaenger = "wueest.marc@bluewin.ch"; // <- Anpassen
-      const betreff = "Erfasste Personendaten inkl. Objekt";
+      const betreff = "Erfasste Personendaten inkl. Ereignis";
 
-      let mailBody = `Datum: ${datum}\nZeit: ${zeit}\nObjekt: ${objekt}\n\nErfasste Personen:\n\n`;
+      let mailBody = `Datum: ${datum}\nZeit: ${zeit}\nereignis: ${ereignis}\n\nErfasste Personen:\n\n`;
 
       alleDaten.forEach((person, index) => {
         mailBody += `Person ${index + 1}:\n`;
