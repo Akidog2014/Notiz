@@ -112,7 +112,7 @@
         <h3>Person ${formIndex + 1}</h3>
         <label>Vorname:<input type="text" name="vorname" placeholder="Vorname eingeben" required></label>
         <label>Nachname:<input type="text" name="nachname" placeholder="Nachname eingeben" required></label>
-        <label>Geburtsdatum: <input type="text" name="geburtsdatum" placeholder="DD.MM.JJJJ" inputmode="numeric" required></label>
+        <label>Geburtsdatum: <input type="text" name="geburtsdatum" placeholder="DD.MM.JJJJ" inputmode="numeric" required oninput="formatDate(event)"></label>
 
         <button type="button" class="weitere-angaben-btn" onclick="zeigeWeitereAngaben(this)">
           ➕ Noch nicht erfasst im myAbi!
@@ -137,6 +137,29 @@
       formIndex++;
     }
 
+    // Geburtsdatum formatieren
+    function formatDate(event) {
+      let value = event.target.value;
+
+      // Entfernen von nicht numerischen Zeichen (außer Punkte)
+      value = value.replace(/[^\d\.]/g, '');
+
+      // Formatieren: DD.MM.JJJJ (2 Ziffern Tag, 2 Ziffern Monat, 4 Ziffern Jahr)
+      if (value.length > 2 && value[2] !== '.') {
+        value = value.slice(0, 2) + '.' + value.slice(2);
+      }
+      if (value.length > 5 && value[5] !== '.') {
+        value = value.slice(0, 5) + '.' + value.slice(5);
+      }
+
+      // Begrenzen der Eingabe auf das Format DD.MM.JJJJ
+      if (value.length > 10) {
+        value = value.slice(0, 10);
+      }
+
+      event.target.value = value;
+    }
+
     // Klick auf "Weitere Angaben erfassen!"
     function zeigeWeitereAngaben(button) {
       const form = button.closest('.person-form');
@@ -153,35 +176,35 @@
       neuesFormular();
       window.scrollTo(0, document.body.scrollHeight);
     }
-function datenAusFormularenSpeichern() {
-  const container = document.getElementById('formContainer');
-  const forms = container.getElementsByClassName('person-form');
 
-  alleDaten.length = 0;
+    function datenAusFormularenSpeichern() {
+      const container = document.getElementById('formContainer');
+      const forms = container.getElementsByClassName('person-form');
 
-  for (const form of forms) {
-    const hatZusatz = form.querySelector('.zusatzfelder').style.display === 'block';
-    const daten = {
-      vorname: form.querySelector('input[name="vorname"]').value,
-      nachname: form.querySelector('input[name="nachname"]').value,
-      geburtsdatum: form.querySelector('input[name="geburtsdatum"]').value,
-      beruf: form.querySelector('input[name="beruf"]').value,
-      telefonnummer: form.querySelector('input[name="telefonnummer"]').value,
-      hatZusatz: hatZusatz,
-      strasse: form.querySelector('input[name="strasse"]')?.value || "",
-      plz: form.querySelector('input[name="plz"]')?.value || "",
-      ort: form.querySelector('input[name="ort"]')?.value || "",
-      vater_vorname: form.querySelector('input[name="vater_vorname"]')?.value || "",
-      vater_nachname: form.querySelector('input[name="vater_nachname"]')?.value || "",
-      mutter_vorname: form.querySelector('input[name="mutter_vorname"]')?.value || "",
-      mutter_nachname: form.querySelector('input[name="mutter_nachname"]')?.value || "",
-      geburtsort: form.querySelector('input[name="geburtsort"]')?.value || "",
-      heimatort: form.querySelector('input[name="heimatort"]')?.value || "",
-    };
-    alleDaten.push(daten);
-  }
-}
+      alleDaten.length = 0;
 
+      for (const form of forms) {
+        const hatZusatz = form.querySelector('.zusatzfelder').style.display === 'block';
+        const daten = {
+          vorname: form.querySelector('input[name="vorname"]').value,
+          nachname: form.querySelector('input[name="nachname"]').value,
+          geburtsdatum: form.querySelector('input[name="geburtsdatum"]').value,
+          beruf: form.querySelector('input[name="beruf"]').value,
+          telefonnummer: form.querySelector('input[name="telefonnummer"]').value,
+          hatZusatz: hatZusatz,
+          strasse: form.querySelector('input[name="strasse"]')?.value || "",
+          plz: form.querySelector('input[name="plz"]')?.value || "",
+          ort: form.querySelector('input[name="ort"]')?.value || "",
+          vater_vorname: form.querySelector('input[name="vater_vorname"]')?.value || "",
+          vater_nachname: form.querySelector('input[name="vater_nachname"]')?.value || "",
+          mutter_vorname: form.querySelector('input[name="mutter_vorname"]')?.value || "",
+          mutter_nachname: form.querySelector('input[name="mutter_nachname"]')?.value || "",
+          geburtsort: form.querySelector('input[name="geburtsort"]')?.value || "",
+          heimatort: form.querySelector('input[name="heimatort"]')?.value || "",
+        };
+        alleDaten.push(daten);
+      }
+    }
 
     function zeigeZusatzMaske() {
       datenAusFormularenSpeichern();
@@ -191,45 +214,43 @@ function datenAusFormularenSpeichern() {
       window.scrollTo(0, document.body.scrollHeight);
     }
 
-function finaleMailAbschicken() {
-  const datum = document.getElementById('datum').value;      // Datum aus Zusatzmaske
-  const zeit = document.getElementById('zeit').value;        // Zeit aus Zusatzmaske
-  const ereignis = document.getElementById('ereignis').value; // ereignis aus Zusatzmaske
+    function finaleMailAbschicken() {
+      const datum = document.getElementById('datum').value;      // Datum aus Zusatzmaske
+      const zeit = document.getElementById('zeit').value;        // Zeit aus Zusatzmaske
+      const ereignis = document.getElementById('ereignis').value; // ereignis aus Zusatzmaske
 
-  const empfaenger = "wueest.marc@bluewin.ch";
+      const empfaenger = "wueest.marc@bluewin.ch";
 
-  // Betreff enthält jetzt Datum + ereignis
-  const betreff = `Personendaten ${datum} - ${ereignis}`;
+      // Betreff enthält jetzt Datum + ereignis
+      const betreff = `Personendaten ${datum} - ${ereignis}`;
 
-  let mailBody = `Datum: ${datum}\nZeit: ${zeit}\nEreignis: ${ereignis}\n\nErfasste Personen:\n\n`;
+      let mailBody = `Datum: ${datum}\nZeit: ${zeit}\nEreignis: ${ereignis}\n\nErfasste Personen:\n\n`;
 
-  alleDaten.forEach((person, index) => {
-    mailBody += `Person ${index + 1}:\n`;
-    mailBody += `Vorname: ${person.vorname}\n`;
-    mailBody += `Nachname: ${person.nachname}\n`;
-    mailBody += `Geburtsdatum: ${person.geburtsdatum}\n`;
+      alleDaten.forEach((person, index) => {
+        mailBody += `Person ${index + 1}:\n`;
+        mailBody += `Vorname: ${person.vorname}\n`;
+        mailBody += `Nachname: ${person.nachname}\n`;
+        mailBody += `Geburtsdatum: ${person.geburtsdatum}\n`;
 
-    if (person.hatZusatz) {
-      mailBody += `\n--- Weitere Angaben ---\n`;
-      mailBody += `Strasse: ${person.strasse}\n`;
-      mailBody += `PLZ: ${person.plz}\n`;
-      mailBody += `Ort: ${person.ort}\n`;
-      mailBody += `Vater: ${person.vater_vorname} ${person.vater_nachname}\n`;
-      mailBody += `Mutter: ${person.mutter_vorname} ${person.mutter_nachname}\n`;
-      mailBody += `Geburtsort: ${person.geburtsort}\n`;
-      mailBody += `Heimatort: ${person.heimatort}\n`;
+        if (person.hatZusatz) {
+          mailBody += `\n--- Weitere Angaben ---\n`;
+          mailBody += `Strasse: ${person.strasse}\n`;
+          mailBody += `PLZ: ${person.plz}\n`;
+          mailBody += `Ort: ${person.ort}\n`;
+          mailBody += `Vater: ${person.vater_vorname} ${person.vater_nachname}\n`;
+          mailBody += `Mutter: ${person.mutter_vorname} ${person.mutter_nachname}\n`;
+          mailBody += `Geburtsort: ${person.geburtsort}\n`;
+          mailBody += `Heimatort: ${person.heimatort}\n`;
+        }
+
+        mailBody += `Beruf: ${person.beruf}\n`;
+        mailBody += `Telefonnummer: ${person.telefonnummer}\n\n`;
+      });
+
+      const mailtoLink = `mailto:${empfaenger}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(mailBody)}`;
+      window.location.href = mailtoLink;
     }
-
-    mailBody += `Beruf: ${person.beruf}\n`;
-    mailBody += `Telefonnummer: ${person.telefonnummer}\n\n`;
-  });
-
-  const mailtoLink = `mailto:${empfaenger}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(mailBody)}`;
-  window.location.href = mailtoLink;
-}
   </script>
 
 </body>
 </html>
-
-
