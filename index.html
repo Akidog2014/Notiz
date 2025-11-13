@@ -1,124 +1,66 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ereignis-Formular</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-      background: #f5f5f5;
-    }
-    form {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 450px;
-      margin: auto;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    label {
-      display: block;
-      margin-top: 10px;
-      font-weight: bold;
-    }
-    input, textarea, button {
-      width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-    }
-    textarea {
-      resize: vertical;
-      min-height: 80px;
-    }
-    button {
-      background-color: #007AFF;
-      color: white;
-      border: none;
-      cursor: pointer;
-      margin-top: 15px;
-    }
-    button:hover {
-      background-color: #005BBB;
-    }
-    #zeitInfo {
-      margin-top: 15px;
-      background: #f0f8ff;
-      padding: 10px;
-      border-radius: 5px;
-      font-size: 15px;
-    }
-  </style>
-</head>
-<body>
-  <h2>Ereignis-Formular</h2>
-  <form id="ereignisForm">
-    <label for="vorname">Vorname:</label>
-    <input type="text" id="vorname" name="vorname" required>
+function zeigeZusatzMaske() {
+  datenAusFormularenSpeichern();
+  const heute = new Date().toISOString().split('T')[0];
+  document.getElementById('datum').value = heute;
 
-    <label for="name">Name:</label>
-    <input type="text" id="name" name="name" required>
-
-    <label for="telefon">Telefonnummer:</label>
-    <input type="tel" id="telefon" name="telefon" required>
-
-    <hr>
-
-    <label for="ereignis">Ereignis:</label>
-    <textarea id="ereignis" name="ereignis" placeholder="Beschreibe das Ereignis..." required></textarea>
-
-    <div id="zeitInfo">
-      <strong>Aktuelles Datum:</strong> <span id="datum"></span><br>
-      <strong>Aktuelle Uhrzeit:</strong> <span id="zeit"></span>
-    </div>
-
-    <button type="button" onclick="senden()">Senden</button>
-  </form>
-
-  <script>
-    // --- Datum und Zeit automatisch einfügen ---
-    function updateZeit() {
-      const jetzt = new Date();
-      const datum = jetzt.toLocaleDateString('de-DE');
-      const zeit = jetzt.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-      document.getElementById('datum').textContent = datum;
-      document.getElementById('zeit').textContent = zeit;
-    }
-
-    // Beim Laden ausführen
-    window.onload = updateZeit;
-
-    // --- Senden-Funktion ---
-    function senden() {
-      const vorname = document.getElementById('vorname').value.trim();
-      const name = document.getElementById('name').value.trim();
-      const telefon = document.getElementById('telefon').value.trim();
-      const ereignis = document.getElementById('ereignis').value.trim();
-      const datum = document.getElementById('datum').textContent;
-      const zeit = document.getElementById('zeit').textContent;
-      const email = "zielperson@example.com"; // <<-- Zieladresse hier eintragen
-
-      if (!vorname || !name || !telefon || !ereignis) {
-        alert("Bitte alle Felder ausfüllen.");
-        return;
+  // Versuche, die Geokoordinaten zu ermitteln
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        document.getElementById('breite').value = position.coords.latitude.toFixed(6);
+        document.getElementById('laenge').value = position.coords.longitude.toFixed(6);
+        document.getElementById('zusatzMaske').style.display = 'block';
+        window.scrollTo(0, document.body.scrollHeight);
+      },
+      (error) => {
+        alert("Standort konnte nicht ermittelt werden: " + error.message);
+        document.getElementById('zusatzMaske').style.display = 'block';
+        window.scrollTo(0, document.body.scrollHeight);
       }
+    );
+  } else {
+    alert("Geolocation wird von diesem Browser nicht unterstützt.");
+    document.getElementById('zusatzMaske').style.display = 'block';
+    window.scrollTo(0, document.body.scrollHeight);
+  }
+}
 
-      const subject = encodeURIComponent("Neues Ereignisformular");
-      const body = encodeURIComponent(
-        `Vorname: ${vorname}\n` +
-        `Name: ${name}\n` +
-        `Telefon: ${telefon}\n\n` +
-        `Ereignis:\n${ereignis}\n\n` +
-        `Datum: ${datum}\n` +
-        `Uhrzeit: ${zeit}`
-      );
+function finaleMailAbschicken() {
+  const zeit = document.getElementById('zeit').value;
+  const objekt = document.getElementById('objekt').value;
+  const datum = document.getElementById('datum').value;
+  const breite = document.getElementById('breite').value;
+  const laenge = document.getElementById('laenge').value;
 
-      window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+  const empfaenger = "wueest.marc@bluewin.ch"; // <- Anpassen
+  const betreff = "Erfasste Personendaten inkl. Objekt und Koordinaten";
+
+  let mailBody = `Datum: ${datum}\nZeit: ${zeit}\nObjekt: ${objekt}\n`;
+  mailBody += `Breitengrad: ${breite}\nLängengrad: ${laenge}\n\n`;
+  mailBody += `Erfasste Personen:\n\n`;
+
+  alleDaten.forEach((person, index) => {
+    mailBody += `Person ${index + 1}:\n`;
+    mailBody += `Vorname: ${person.vorname}\n`;
+    mailBody += `Nachname: ${person.nachname}\n`;
+    mailBody += `Geburtsdatum: ${person.geburtsdatum}\n`;
+
+    if (person.hatZusatz) {
+      mailBody += `\n--- Weitere Angaben ---\n`;
+      mailBody += `Strasse: ${person.strasse}\n`;
+      mailBody += `PLZ: ${person.plz}\n`;
+      mailBody += `Ort: ${person.ort}\n`;
+      mailBody += `Vater: ${person.vater_vorname} ${person.vater_nachname}\n`;
+      mailBody += `Mutter: ${person.mutter_vorname} ${person.mutter_nachname}\n`;
+      mailBody += `Geburtsort: ${person.geburtsort}\n`;
+      mailBody += `Heimatort: ${person.heimatort}\n`;
     }
-  </script>
-</body>
-</html>
+
+    mailBody += `\nArbeitgeber: ${person.arbeitgeber}\n`;
+    mailBody += `Beruf: ${person.beruf}\n`;
+    mailBody += `Telefonnummer: ${person.telefonnummer}\n\n`;
+  });
+
+  const mailtoLink = `mailto:${empfaenger}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(mailBody)}`;
+  window.location.href = mailtoLink;
+}
