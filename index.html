@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kontakt-Formular mit Standortanzeige</title>
+  <title>Ereignis-Formular</title>
   <style>
     body {
       font-family: sans-serif;
@@ -14,15 +14,16 @@
       background: white;
       padding: 20px;
       border-radius: 10px;
-      max-width: 400px;
+      max-width: 450px;
       margin: auto;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
     label {
       display: block;
       margin-top: 10px;
+      font-weight: bold;
     }
-    input, button {
+    input, textarea, button {
       width: 100%;
       padding: 8px;
       margin-top: 5px;
@@ -30,97 +31,93 @@
       border: 1px solid #ccc;
       font-size: 16px;
     }
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
     button {
       background-color: #007AFF;
       color: white;
       border: none;
       cursor: pointer;
+      margin-top: 15px;
     }
     button:hover {
       background-color: #005BBB;
     }
-    #gpsDaten {
+    #zeitInfo {
       margin-top: 15px;
-      padding: 10px;
       background: #f0f8ff;
+      padding: 10px;
       border-radius: 5px;
-      font-size: 14px;
-      color: #333;
-      display: none; /* wird erst sichtbar, wenn Daten da sind */
+      font-size: 15px;
     }
   </style>
 </head>
 <body>
-  <h2>Kontakt-Formular</h2>
-  <form id="kontaktForm">
+  <h2>Ereignis-Formular</h2>
+  <form id="ereignisForm">
+    <label for="vorname">Vorname:</label>
+    <input type="text" id="vorname" name="vorname" required>
+
     <label for="name">Name:</label>
     <input type="text" id="name" name="name" required>
 
     <label for="telefon">Telefonnummer:</label>
     <input type="tel" id="telefon" name="telefon" required>
 
-    <div id="gpsDaten">
-      <strong>Standortdaten:</strong><br>
-      Breite: <span id="lat"></span><br>
-      Länge: <span id="lon"></span><br>
-      Genauigkeit: ±<span id="acc"></span> m
+    <hr>
+
+    <label for="ereignis">Ereignis:</label>
+    <textarea id="ereignis" name="ereignis" placeholder="Beschreibe das Ereignis..." required></textarea>
+
+    <div id="zeitInfo">
+      <strong>Aktuelles Datum:</strong> <span id="datum"></span><br>
+      <strong>Aktuelle Uhrzeit:</strong> <span id="zeit"></span>
     </div>
 
     <button type="button" onclick="senden()">Senden</button>
   </form>
 
   <script>
-    let aktuelleKoordinaten = null; // wird später mit GPS-Daten gefüllt
+    // --- Datum und Zeit automatisch einfügen ---
+    function updateZeit() {
+      const jetzt = new Date();
+      const datum = jetzt.toLocaleDateString('de-DE');
+      const zeit = jetzt.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('datum').textContent = datum;
+      document.getElementById('zeit').textContent = zeit;
+    }
 
-    // --- GPS-Daten automatisch beim Laden abrufen ---
-    window.onload = function() {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const lat = position.coords.latitude.toFixed(6);
-            const lon = position.coords.longitude.toFixed(6);
-            const acc = position.coords.accuracy.toFixed(1);
-
-            aktuelleKoordinaten = { lat, lon, acc };
-
-            // Daten im Formular anzeigen
-            document.getElementById("lat").textContent = lat;
-            document.getElementById("lon").textContent = lon;
-            document.getElementById("acc").textContent = acc;
-            document.getElementById("gpsDaten").style.display = "block";
-          },
-          (error) => {
-            console.warn("Standort konnte nicht ermittelt werden:", error);
-          }
-        );
-      } else {
-        console.warn("Dieses Gerät unterstützt keine Standortabfrage.");
-      }
-    };
+    // Beim Laden ausführen
+    window.onload = updateZeit;
 
     // --- Senden-Funktion ---
     function senden() {
-      const name = document.getElementById('name').value;
-      const telefon = document.getElementById('telefon').value;
-      const email = "zielperson@example.com"; // <<-- Hier deine Zieladresse eintragen
+      const vorname = document.getElementById('vorname').value.trim();
+      const name = document.getElementById('name').value.trim();
+      const telefon = document.getElementById('telefon').value.trim();
+      const ereignis = document.getElementById('ereignis').value.trim();
+      const datum = document.getElementById('datum').textContent;
+      const zeit = document.getElementById('zeit').textContent;
+      const email = "zielperson@example.com"; // <<-- Zieladresse hier eintragen
 
-      if (!name || !telefon) {
-        alert("Bitte Name und Telefonnummer ausfüllen.");
+      if (!vorname || !name || !telefon || !ereignis) {
+        alert("Bitte alle Felder ausfüllen.");
         return;
       }
 
-      let body = `Name: ${name}\nTelefon: ${telefon}`;
+      const subject = encodeURIComponent("Neues Ereignisformular");
+      const body = encodeURIComponent(
+        `Vorname: ${vorname}\n` +
+        `Name: ${name}\n` +
+        `Telefon: ${telefon}\n\n` +
+        `Ereignis:\n${ereignis}\n\n` +
+        `Datum: ${datum}\n` +
+        `Uhrzeit: ${zeit}`
+      );
 
-      if (aktuelleKoordinaten) {
-        body += `\n\nStandortdaten:\nBreite: ${aktuelleKoordinaten.lat}\nLänge: ${aktuelleKoordinaten.lon}\nGenauigkeit: ±${aktuelleKoordinaten.acc} m`;
-      } else {
-        body += `\n\n(Standort nicht verfügbar oder nicht freigegeben.)`;
-      }
-
-      const subject = encodeURIComponent("Neues Kontaktformular mit Standort");
-      const mailBody = encodeURIComponent(body);
-
-      window.location.href = `mailto:${email}?subject=${subject}&body=${mailBody}`;
+      window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
     }
   </script>
 </body>
