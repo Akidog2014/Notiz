@@ -153,36 +153,35 @@
       neuesFormular();
       window.scrollTo(0, document.body.scrollHeight);
     }
+function datenAusFormularenSpeichern() {
+  const container = document.getElementById('formContainer');
+  const forms = container.getElementsByClassName('person-form');
 
-    function datenAusFormularenSpeichern() {
-      const container = document.getElementById('formContainer');
-      const forms = container.getElementsByClassName('person-form');
+  alleDaten.length = 0;
 
-      alleDaten.length = 0;
+  for (const form of forms) {
+    const hatZusatz = form.querySelector('.zusatzfelder').style.display === 'block';
+    const daten = {
+      vorname: form.querySelector('input[name="vorname"]').value,
+      nachname: form.querySelector('input[name="nachname"]').value,
+      geburtsdatum: form.querySelector('input[name="geburtsdatum"]').value,
+      beruf: form.querySelector('input[name="beruf"]').value,
+      telefonnummer: form.querySelector('input[name="telefonnummer"]').value,
+      hatZusatz: hatZusatz,
+      strasse: form.querySelector('input[name="strasse"]')?.value || "",
+      plz: form.querySelector('input[name="plz"]')?.value || "",
+      ort: form.querySelector('input[name="ort"]')?.value || "",
+      vater_vorname: form.querySelector('input[name="vater_vorname"]')?.value || "",
+      vater_nachname: form.querySelector('input[name="vater_nachname"]')?.value || "",
+      mutter_vorname: form.querySelector('input[name="mutter_vorname"]')?.value || "",
+      mutter_nachname: form.querySelector('input[name="mutter_nachname"]')?.value || "",
+      geburtsort: form.querySelector('input[name="geburtsort"]')?.value || "",
+      heimatort: form.querySelector('input[name="heimatort"]')?.value || "",
+    };
+    alleDaten.push(daten);
+  }
+}
 
-      for (const form of forms) {
-        const hatZusatz = form.querySelector('.zusatzfelder').style.display === 'block';
-        const daten = {
-          vorname: form.querySelector('input[name="vorname"]').value,
-          nachname: form.querySelector('input[name="nachname"]').value,
-          geburtsdatum: form.querySelector('input[name="geburtsdatum"]').value,
-          Ereignis: form.querySelector('input[name="Ereignis"]').value,
-          beruf: form.querySelector('input[name="beruf"]').value,
-          telefonnummer: form.querySelector('input[name="telefonnummer"]').value,
-          hatZusatz: hatZusatz,
-          strasse: form.querySelector('input[name="strasse"]')?.value || "",
-          plz: form.querySelector('input[name="plz"]')?.value || "",
-          ort: form.querySelector('input[name="ort"]')?.value || "",
-          vater_vorname: form.querySelector('input[name="vater_vorname"]')?.value || "",
-          vater_nachname: form.querySelector('input[name="vater_nachname"]')?.value || "",
-          mutter_vorname: form.querySelector('input[name="mutter_vorname"]')?.value || "",
-          mutter_nachname: form.querySelector('input[name="mutter_nachname"]')?.value || "",
-          geburtsort: form.querySelector('input[name="geburtsort"]')?.value || "",
-          heimatort: form.querySelector('input[name="heimatort"]')?.value || "",
-        };
-        alleDaten.push(daten);
-      }
-    }
 
     function zeigeZusatzMaske() {
       datenAusFormularenSpeichern();
