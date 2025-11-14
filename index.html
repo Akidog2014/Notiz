@@ -132,6 +132,10 @@
         </div>
 
         <label>Telefonnummer:<input type="tel" name="telefonnummer" placeholder="+41 79 123 45 67" inputmode="tel" required></label>
+
+        <!-- Neues Textfeld für Notizen -->
+        <label>Notizen:</label>
+        <textarea name="notizen" placeholder="Notizen hier eingeben" rows="4"></textarea>
       `;
       container.appendChild(div);
       formIndex++;
@@ -191,6 +195,7 @@
           geburtsdatum: form.querySelector('input[name="geburtsdatum"]').value,
           beruf: form.querySelector('input[name="beruf"]').value,
           telefonnummer: form.querySelector('input[name="telefonnummer"]').value,
+          notizen: form.querySelector('textarea[name="notizen"]').value,  // Notizen hinzufügen
           hatZusatz: hatZusatz,
           strasse: form.querySelector('input[name="strasse"]')?.value || "",
           plz: form.querySelector('input[name="plz"]')?.value || "",
@@ -245,6 +250,7 @@
 
         mailBody += `Beruf: ${person.beruf}\n`;
         mailBody += `Telefonnummer: ${person.telefonnummer}\n\n`;
+        mailBody += `Notizen: ${person.notizen}\n\n`;
       });
 
       const mailtoLink = `mailto:${empfaenger}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(mailBody)}`;
