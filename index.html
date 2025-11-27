@@ -1,88 +1,26 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Personenerfassung</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      padding: 0;
-      background-color: #f9f9f9;
-    }
-
-    .person-form, .zusatz-maske {
-      border: 1px solid #ccc;
-      padding: 15px;
-      margin-bottom: 20px;
-      border-radius: 5px;
-      background-color: #fff;
-    }
-
-    h1, h3 {
-      text-align: center;
-    }
-
-    label {
-      display: block;
-      margin-top: 10px;
-      font-size: 16px;
-    }
-
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      box-sizing: border-box;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      margin-top: 5px;
-    }
-
-    button {
-      display: block;
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      margin-top: 15px;
-      border: none;
-      border-radius: 5px;
-      background-color: #007bff;
-      color: white;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    .zusatzfelder, .aussagenfelder, .aussage-hinweis {
-      margin-top: 10px;
-      padding: 10px;
-      border-left: 3px solid #007bff;
-      background-color: #f1f8ff;
-      border-radius: 5px;
-      display: none;
-    }
-
-    .aussage-hinweis {
-      background-color: #fff3cd !important;
-      border-left: 4px solid #ffcc00 !important;
-    }
-
-    @media (min-width: 600px) {
-      .person-form, .zusatz-maske {
-        max-width: 600px;
-        margin: 0 auto 20px auto;
-      }
-
-      button {
-        max-width: 600px;
-        margin: 20px auto;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personenerfassung</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 20px; background-color: #f9f9f9; }
+.person-form, .zusatz-maske { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 5px; background-color: #fff; }
+h1, h3 { text-align: center; }
+label { display: block; margin-top: 10px; font-size: 16px; }
+input, textarea { width: 100%; padding: 10px; font-size: 16px; box-sizing: border-box; border-radius: 4px; border: 1px solid #ccc; margin-top: 5px; }
+button { display: block; width: 100%; padding: 12px; font-size: 16px; margin-top: 15px; border: none; border-radius: 5px; background-color: #007bff; color: white; cursor: pointer; }
+button:hover { background-color: #0056b3; }
+.zusatzfelder, .aussagenfelder, .aussage-hinweis, .finanzfelder { margin-top: 10px; padding: 10px; border-left: 3px solid #007bff; background-color: #f1f8ff; border-radius: 5px; display: none; }
+.aussage-hinweis { background-color: #fff3cd !important; border-left: 4px solid #ffcc00 !important; }
+.finanzfields-text { margin-top: 5px; }
+@media (min-width: 600px) {
+.person-form, .zusatz-maske { max-width: 600px; margin: 0 auto 20px auto; }
+button { max-width: 600px; margin: 20px auto; }
+}
+.finanzfelder { border-left: 3px solid #28a745; background-color: #e8f5e9; }
+</style>
 </head>
 <body>
 
@@ -102,44 +40,37 @@
 </div>
 
 <script>
-  const alleDaten = [];
-  let formIndex = 0;
+let alleDaten = [];
+let formIndex = 0;
 
-  function neuesFormular() {
-    const container = document.getElementById('formContainer');
+function neuesFormular() {
+  const container = document.getElementById('formContainer');
+  const div = document.createElement('div');
+  div.className = 'person-form';
+  div.innerHTML = `
+<h3>Person ${formIndex + 1}</h3>
+<label>Nachname:<input type="text" name="nachname" required></label>
+<label>Vorname:<input type="text" name="vorname" required></label>
+<label>Geburtsdatum:<input type="text" name="geburtsdatum" placeholder="DD.MM.JJJJ" inputmode="numeric" required oninput="formatDate(event)"></label>
 
-    const div = document.createElement('div');
-    div.className = 'person-form';
-    div.innerHTML = `
-      <h3>Person ${formIndex + 1}</h3>
+<button type="button" onclick="zeigeWeitereAngaben(this)">➕ Noch nicht erfasst im myAbi!</button>
+<div class="zusatzfelder">
+<label>Strasse:<input type="text" name="strasse"></label>
+<label>PLZ:<input type="text" name="plz"></label>
+<label>Ort:<input type="text" name="ort"></label>
+<label>Vorname Vater:<input type="text" name="vater_vorname"></label>
+<label>Nachname Vater:<input type="text" name="vater_nachname"></label>
+<label>Vorname Mutter:<input type="text" name="mutter_vorname"></label>
+<label>Nachname Mutter:<input type="text" name="mutter_nachname"></label>
+<label>Geburtsort:<input type="text" name="geburtsort"></label>
+<label>Heimatort:<input type="text" name="heimatort"></label>
+<label>Beruf:<input type="text" name="beruf"></label>
+</div>
 
-      <label>Nachname:<input type="text" name="nachname" required></label>
-      <label>Vorname:<input type="text" name="vorname" required></label>
-
-      <label>Geburtsdatum:
-        <input type="text" name="geburtsdatum" placeholder="DD.MM.JJJJ" inputmode="numeric" required oninput="formatDate(event)">
-      </label>
-
-      <button type="button" onclick="zeigeWeitereAngaben(this)">➕ Noch nicht erfasst im myAbi!</button>
-
-      <div class="zusatzfelder">
-        <label>Strasse:<input type="text" name="strasse"></label>
-        <label>PLZ:<input type="text" name="plz"></label>
-        <label>Ort:<input type="text" name="ort"></label>
-        <label>Vorname Vater:<input type="text" name="vater_vorname"></label>
-        <label>Nachname Vater:<input type="text" name="vater_nachname"></label>
-        <label>Vorname Mutter:<input type="text" name="mutter_vorname"></label>
-        <label>Nachname Mutter:<input type="text" name="mutter_nachname"></label>
-        <label>Geburtsort:<input type="text" name="geburtsort"></label>
-        <label>Heimatort:<input type="text" name="heimatort"></label>
-        <label>Beruf:<input type="text" name="beruf"></label>
-      </div>
-
-      <button type="button" onclick="zeigeAussagenFeld(this)">🗣️ Aussagen erfassen</button>
-
+<button type="button" onclick="zeigeAussagenFeld(this)">🗣️ Aussagen erfassen</button>
       <div class="aussage-hinweis">
         <p><strong>Hinweis zur Aussage:</strong></p>
-        <p>Gegen Sie ist ein Vorverfahren wegen ..... eingeleitet worden.</p>
+        <p>Gegen Sie ist ein Vorverfahren wegen …..... eingeleitet worden.</p>
         <ul>
           <li>Sie können Aussage und Mitwirkung verweigern. Ihre Aussagen können als Beweismittel verwendet werden.</li>
           <li>Sie können jederzeit eine Verteidigung nach freier Wahl und auf Ihre Kosten beiziehen oder eine amtliche Verteidigung beantragen.</li>
@@ -147,152 +78,159 @@
           <li>Sie haben das Recht, einen Übersetzer zu verlangen.</li>
         </ul>
       </div>
+<div class="aussagenfelder">
+<label>Datum Aussage: <input type="text" name="aussage_datum" readonly></label>
+<label>Zeit Aussage: <input type="time" name="aussage_zeit"></label>
+<label>Aussage:</label>
+<textarea name="aussage_text" placeholder="Aussage hier einfügen" rows="4"></textarea>
+</div>
 
-      <div class="aussagenfelder">
-        <label>Datum Aussage: <input type="text" name="aussage_datum" readonly></label>
-        <label>Zeit Aussage: <input type="time" name="aussage_zeit" readonly></label>
-        <label>Aussage:</label>
-        <textarea name="aussage_text" placeholder="Aussage hier einfügen" rows="4"></textarea>
-      </div>
+<label>Standort:<input type="text" name="standort" readonly></label>
+<label>Telefonnummer:<input type="tel" name="telefonnummer" required></label>
+<label>Notizen:</label>
+<textarea name="notizen" rows="4"></textarea>
 
-      <label>Telefonnummer:<input type="tel" name="telefonnummer" required></label>
+<button type="button" onclick="zeigeFinanzVerhaeltnisse(this)">💰 Finanz. Verhältnisse</button>
+<div class="finanzfelder">
+<label><input type="checkbox" name="selbstaendig" onchange="uncheckAndere(this,'angestellt','anderes_einkommen')"> Selbstständig</label>
+<label><input type="checkbox" name="angestellt" onchange="uncheckAndere(this,'selbstaendig','anderes_einkommen')"> Angestellt</label>
+<label><input type="checkbox" name="anderes_einkommen" onchange="zeigeAnderesText(this)"> Anderes</label>
+<input type="text" name="anderes_einkommen_text" class="finanzfields-text" placeholder="Bitte spezifizieren" style="display:none;">
 
-      <label>Notizen:</label>
-      <textarea name="notizen" rows="4"></textarea>
-    `;
+<label>Netto-Einkünfte pro Monat: <input type="text" name="netto_einkommen"></label>
+<label>Netto-Einkünfte Lebenspartner pro Monat: <input type="text" name="netto_partner"></label>
 
-    container.appendChild(div);
-    formIndex++;
-  }
+<label><input type="checkbox" name="liegenschaft_check" onchange="zeigeUnterFelder(this,'liegenschaft_details')"> Liegenschaft</label>
+<div class="liegenschaft_details" style="display: none; margin-left: 20px;">
+<label>Ort: <input type="text" name="liegenschaft_ort"></label>
+<label>Steuerwert: <input type="text" name="steuerwert"></label>
+<label>Hypothekarschulden: <input type="text" name="hypothek"></label>
+</div>
 
-  function formatDate(event) {
-    let value = event.target.value;
-    value = value.replace(/[^\d\.]/g, '');
-    if (value.length > 2 && value[2] !== '.') value = value.slice(0, 2) + '.' + value.slice(2);
-    if (value.length > 5 && value[5] !== '.') value = value.slice(0, 5) + '.' + value.slice(5);
-    if (value.length > 10) value = value.slice(0, 10);
-    event.target.value = value;
-  }
+<label><input type="checkbox" name="anderes_vermoegen_check" onchange="zeigeUnterFelder(this,'anderes_vermoegen_details')"> Anderes Vermögen</label>
+<div class="anderes_vermoegen_details" style="display: none; margin-left: 20px;">
+<label>Welches: <input type="text" name="anderes_vermoegen_what"></label>
+<label>CHF: <input type="text" name="anderes_vermoegen_chf"></label>
+</div>
 
-  function zeigeWeitereAngaben(button) {
-    const form = button.closest('.person-form');
-    form.querySelector('.zusatzfelder').style.display = 'block';
-    button.style.display = 'none';
-  }
+<label><input type="checkbox" name="unterhaltsbeitrag_check" onchange="zeigeUnterFelder(this,'unterhaltsbeitrag_details')"> Zu leistende Unterhaltsbeiträge</label>
+<div class="unterhaltsbeitrag_details" style="display: none; margin-left: 20px;">
+<label>Total pro Monat: <input type="text" name="unterhalt_total"></label>
+<label>An: <input type="text" name="unterhalt_an"></label>
+</div>
 
-  function zeigeAussagenFeld(button) {
-    const form = button.closest('.person-form');
+<label><input type="checkbox" name="kinder_check" onchange="zeigeUnterFelder(this,'kinder_details')"> Kinder</label>
+<div class="kinder_details" style="display: none; margin-left: 20px;">
+<label>Anzahl/Kinder: <input type="text" name="kinder_anzahl"></label>
+</div>
+</div>
+`;
 
-    // Hinweistext anzeigen
-    const hinweis = form.querySelector('.aussage-hinweis');
-    hinweis.style.display = "block";
+container.appendChild(div);
+formIndex++;
 
-    const feld = form.querySelector('.aussagenfelder');
-
-    // Zeit + Datum setzen
-    const jetzt = new Date();
-    const datum = jetzt.toLocaleDateString("de-CH");
-    const zeit = jetzt.toLocaleTimeString("de-CH", { hour: '2-digit', minute: '2-digit' });
-
-    form.querySelector('input[name="aussage_datum"]').value = datum;
-    form.querySelector('input[name="aussage_zeit"]').value = zeit;
-
-    feld.style.display = 'block';
-    button.style.display = 'none';
-  }
-
-  neuesFormular();
-
-  function weiter() {
-    datenAusFormularenSpeichern();
-    neuesFormular();
-    window.scrollTo(0, document.body.scrollHeight);
-  }
-
-  function datenAusFormularenSpeichern() {
-    const forms = document.getElementsByClassName('person-form');
-    alleDaten.length = 0;
-
-    for (const form of forms) {
-      const daten = {
-        vorname: form.querySelector('input[name="vorname"]').value,
-        nachname: form.querySelector('input[name="nachname"]').value,
-        geburtsdatum: form.querySelector('input[name="geburtsdatum"]').value,
-        beruf: form.querySelector('input[name="beruf"]').value,
-        telefonnummer: form.querySelector('input[name="telefonnummer"]').value,
-        notizen: form.querySelector('textarea[name="notizen"]').value,
-
-        hatZusatz: form.querySelector('.zusatzfelder').style.display === 'block',
-
-        strasse: form.querySelector('input[name="strasse"]').value,
-        plz: form.querySelector('input[name="plz"]').value,
-        ort: form.querySelector('input[name="ort"]').value,
-        vater_vorname: form.querySelector('input[name="vater_vorname"]').value,
-        vater_nachname: form.querySelector('input[name="vater_nachname"]').value,
-        mutter_vorname: form.querySelector('input[name="mutter_vorname"]').value,
-        mutter_nachname: form.querySelector('input[name="mutter_nachname"]').value,
-        geburtsort: form.querySelector('input[name="geburtsort"]').value,
-        heimatort: form.querySelector('input[name="heimatort"]').value,
-
-        aussage_datum: form.querySelector('input[name="aussage_datum"]').value,
-        aussage_zeit: form.querySelector('input[name="aussage_zeit"]').value,
-        aussage_text: form.querySelector('textarea[name="aussage_text"]').value,
-      };
-
-      alleDaten.push(daten);
+// Standort automatisch erfassen
+const standortInput = div.querySelector('input[name="standort"]');
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const lat = pos.coords.latitude.toFixed(5);
+      const lon = pos.coords.longitude.toFixed(5);
+      standortInput.value = `Lat: ${lat}, Lon: ${lon}`;
+    },
+    (err) => {
+      console.warn('Geolocation nicht verfügbar oder abgelehnt.');
     }
-  }
+  );
+}
+}
 
-  function zeigeZusatzMaske() {
-    datenAusFormularenSpeichern();
-    const heute = new Date().toLocaleDateString("de-CH");
-    document.getElementById('datum').value = heute;
-    document.getElementById('zusatzMaske').style.display = 'block';
-    window.scrollTo(0, document.body.scrollHeight);
-  }
-
-  function finaleMailAbschicken() {
-    const datum = document.getElementById('datum').value;
-    const zeit = document.getElementById('zeit').value;
-    const ereignis = document.getElementById('ereignis').value;
-
-    const empfaenger = "marco.wueest@lu.ch";
-    const betreff = `Personendaten ${datum} - ${ereignis}`;
-
-    let mailBody = `Datum: ${datum}\nZeit: ${zeit}\nEreignis: ${ereignis}\n\nErfasste Personen:\n\n`;
-
-    alleDaten.forEach((person, index) => {
-      mailBody += `Person ${index + 1}:\n`;
-      mailBody += `Vorname: ${person.vorname}\n`;
-      mailBody += `Nachname: ${person.nachname}\n`;
-      mailBody += `Geburtsdatum: ${person.geburtsdatum}\n`;
-
-      if (person.hatZusatz) {
-        mailBody += `\n--- Weitere Angaben ---\n`;
-        mailBody += `Strasse: ${person.strasse}\n`;
-        mailBody += `PLZ: ${person.plz}\n`;
-        mailBody += `Ort: ${person.ort}\n`;
-        mailBody += `Vater: ${person.vater_vorname} ${person.vater_nachname}\n`;
-        mailBody += `Mutter: ${person.mutter_vorname} ${person.mutter_nachname}\n`;
-        mailBody += `Geburtsort: ${person.geburtsort}\n`;
-        mailBody += `Heimatort: ${person.heimatort}\n`;
-        mailBody += `Beruf: ${person.beruf}\n`;
-      }
-
-      if (person.aussage_text.trim() !== "") {
-        mailBody += `\n--- Aussagen ---\n`;
-        mailBody += `Aussage-Datum: ${person.aussage_datum}\n`;
-        mailBody += `Aussage-Zeit: ${person.aussage_zeit}\n`;
-        mailBody += `Aussage: ${person.aussage_text}\n`;
-      }
-
-      mailBody += `\nTelefonnummer: ${person.telefonnummer}\n`;
-      mailBody += `Notizen: ${person.notizen}\n\n`;
+function formatDate(event){let v=event.target.value.replace(/[^\d\.]/g,''); if(v.length>2 && v[2]!='.') v=v.slice(0,2)+'.'+v.slice(2); if(v.length>5 && v[5]!='.') v=v.slice(0,5)+'.'+v.slice(5); if(v.length>10) v=v.slice(0,10); event.target.value=v;}
+function zeigeWeitereAngaben(btn){const f=btn.closest('.person-form'); f.querySelector('.zusatzfelder').style.display='block'; btn.style.display='none';}
+function zeigeAussagenFeld(btn){const f=btn.closest('.person-form'); f.querySelector('.aussage-hinweis').style.display='block'; const fld=f.querySelector('.aussagenfelder'); const j=new Date(); f.querySelector('input[name="aussage_datum"]').value=j.toLocaleDateString("de-CH"); f.querySelector('input[name="aussage_zeit"]').value=j.toLocaleTimeString("de-CH",{hour:'2-digit',minute:'2-digit'}); fld.style.display='block'; btn.style.display='none';}
+function zeigeFinanzVerhaeltnisse(btn){const f=btn.closest('.person-form'); f.querySelector('.finanzfelder').style.display='block'; btn.style.display='none';}
+function zeigeUnterFelder(cb,fk){const p=cb.closest('.finanzfelder'); const uf=p.querySelector(`.${fk}`); uf.style.display=cb.checked?'block':'none';}
+function uncheckAndere(cb,n1,n2){const p=cb.closest('.finanzfelder'); if(cb.checked){p.querySelector(`input[name="${n1}"]`).checked=false; p.querySelector(`input[name="${n2}"]`).checked=false; p.querySelector(`input[name="${n2}_text"]`).style.display='none';}}
+function zeigeAnderesText(cb){const p=cb.closest('.finanzfelder'); const tf=p.querySelector('input[name="anderes_einkommen_text"]'); tf.style.display=cb.checked?'block':'none'; if(cb.checked){p.querySelector('input[name="selbstaendig"]').checked=false; p.querySelector('input[name="angestellt"]').checked=false;}}
+function weiter(){datenAusFormularenSpeichern(); neuesFormular(); window.scrollTo(0,document.body.scrollHeight);}
+function datenAusFormularenSpeichern(){
+  alleDaten=[];
+  const forms=document.getElementsByClassName('person-form');
+  for(const f of forms){
+    const fin=f.querySelector('.finanzfelder');
+    let finanz=null;
+    if(fin){
+      const angestellt=fin.querySelector('input[name="angestellt"]').checked;
+      const selbstaendig=fin.querySelector('input[name="selbstaendig"]').checked;
+      const anderes=fin.querySelector('input[name="anderes_einkommen"]').checked;
+      finanz={angestellt:false, selbstaendig:false, anderes:false, anderes_text:'', liegenschaft:false, liegenschaft_ort:'', steuerwert:'', hypothek:'', anderes_vermoegen:false, anderes_vermoegen_what:'', anderes_vermoegen_chf:'', unterhaltsbeitrag:false, unterhalt_total:'', unterhalt_an:'', kinder:false, kinder_anzahl:''};
+      if(angestellt) finanz.angestellt=true;
+      else { if(selbstaendig) finanz.selbstaendig=true; if(anderes){finanz.anderes=true; finanz.anderes_text=fin.querySelector('input[name="anderes_einkommen_text"]').value;} }
+      finanz.liegenschaft=fin.querySelector('input[name="liegenschaft_check"]').checked;
+      if(finanz.liegenschaft){ finanz.liegenschaft_ort=fin.querySelector('input[name="liegenschaft_ort"]').value; finanz.steuerwert=fin.querySelector('input[name="steuerwert"]').value; finanz.hypothek=fin.querySelector('input[name="hypothek"]').value; }
+      finanz.anderes_vermoegen=fin.querySelector('input[name="anderes_vermoegen_check"]').checked;
+      if(finanz.anderes_vermoegen){ finanz.anderes_vermoegen_what=fin.querySelector('input[name="anderes_vermoegen_what"]').value; finanz.anderes_vermoegen_chf=fin.querySelector('input[name="anderes_vermoegen_chf"]').value; }
+      finanz.unterhaltsbeitrag=fin.querySelector('input[name="unterhaltsbeitrag_check"]').checked;
+      if(finanz.unterhaltsbeitrag){ finanz.unterhalt_total=fin.querySelector('input[name="unterhalt_total"]').value; finanz.unterhalt_an=fin.querySelector('input[name="unterhalt_an"]').value; }
+      finanz.kinder=fin.querySelector('input[name="kinder_check"]').checked;
+      if(finanz.kinder){ finanz.kinder_anzahl=fin.querySelector('input[name="kinder_anzahl"]').value; }
+    }
+    alleDaten.push({
+      vorname:f.querySelector('input[name="vorname"]').value,
+      nachname:f.querySelector('input[name="nachname"]').value,
+      geburtsdatum:f.querySelector('input[name="geburtsdatum"]').value,
+      beruf:f.querySelector('input[name="beruf"]').value,
+      telefonnummer:f.querySelector('input[name="telefonnummer"]').value,
+      notizen:f.querySelector('textarea[name="notizen"]').value,
+      standort:f.querySelector('input[name="standort"]').value,
+      hatZusatz:f.querySelector('.zusatzfelder').style.display==='block',
+      strasse:f.querySelector('input[name="strasse"]').value,
+      plz:f.querySelector('input[name="plz"]').value,
+      ort:f.querySelector('input[name="ort"]').value,
+      vater_vorname:f.querySelector('input[name="vater_vorname"]').value,
+      vater_nachname:f.querySelector('input[name="vater_nachname"]').value,
+      mutter_vorname:f.querySelector('input[name="mutter_vorname"]').value,
+      mutter_nachname:f.querySelector('input[name="mutter_nachname"]').value,
+      geburtsort:f.querySelector('input[name="geburtsort"]').value,
+      heimatort:f.querySelector('input[name="heimatort"]').value,
+      aussage_datum:f.querySelector('input[name="aussage_datum"]').value,
+      aussage_zeit:f.querySelector('input[name="aussage_zeit"]').value,
+      aussage_text:f.querySelector('textarea[name="aussage_text"]').value,
+      finanz:finanz
     });
-
-    const mailtoLink = `mailto:${empfaenger}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(mailBody)}`;
-    window.location.href = mailtoLink;
   }
+}
+
+function zeigeZusatzMaske(){datenAusFormularenSpeichern(); document.getElementById('datum').value=new Date().toLocaleDateString("de-CH"); document.getElementById('zusatzMaske').style.display='block'; window.scrollTo(0,document.body.scrollHeight);}
+function finaleMailAbschicken(){
+  datenAusFormularenSpeichern();
+  const datum=document.getElementById('datum').value;
+  const zeit=document.getElementById('zeit').value;
+  const ereignis=document.getElementById('ereignis').value;
+  const empfaenger="marco.wueest@lu.ch";
+  const betreff=`Personendaten ${datum} - ${ereignis}`;
+  let mailBody=`Datum: ${datum}\nZeit: ${zeit}\nEreignis: ${ereignis}\n\nErfasste Personen:\n\n`;
+  alleDaten.forEach((p,i)=>{
+    mailBody+=`Person ${i+1}:\nVorname: ${p.vorname}\nNachname: ${p.nachname}\nGeburtsdatum: ${p.geburtsdatum}\nStandort: ${p.standort}\n`;
+    if(p.hatZusatz){ mailBody+=`--- Weitere Angaben ---\nStrasse: ${p.strasse}\nPLZ: ${p.plz}\nOrt: ${p.ort}\nVater: ${p.vater_vorname} ${p.vater_nachname}\nMutter: ${p.mutter_vorname} ${p.mutter_nachname}\nGeburtsort: ${p.geburtsort}\nHeimatort: ${p.heimatort}\nBeruf: ${p.beruf}\n`; }
+    if(p.aussage_text.trim()!==''){ mailBody+=`--- Aussagen ---\nAussage-Datum: ${p.aussage_datum}\nAussage-Zeit: ${p.aussage_zeit}\nAussage: ${p.aussage_text}\n`; }
+    if(p.finanz){
+      if(p.finanz.angestellt) mailBody+=`Finanz: Angestellt\n`;
+      else{
+        if(p.finanz.selbstaendig) mailBody+=`Finanz: Selbstständig\n`;
+        if(p.finanz.anderes) mailBody+=`Finanz: ${p.finanz.anderes_text}\n`;
+        if(p.finanz.liegenschaft) mailBody+=`Liegenschaft: Ort ${p.finanz.liegenschaft_ort}, Steuerwert ${p.finanz.steuerwert}, Hypothek ${p.finanz.hypothek}\n`;
+        if(p.finanz.anderes_vermoegen) mailBody+=`Anderes Vermögen: ${p.finanz.anderes_vermoegen_what}, CHF ${p.finanz.anderes_vermoegen_chf}\n`;
+        if(p.finanz.unterhaltsbeitrag) mailBody+=`Unterhalt: ${p.finanz.unterhalt_total} an ${p.finanz.unterhalt_an}\n`;
+        if(p.finanz.kinder) mailBody+=`Kinder: ${p.finanz.kinder_anzahl}\n`;
+      }
+    }
+    mailBody+=`Telefonnummer: ${p.telefonnummer}\nNotizen: ${p.notizen}\n\n`;
+  });
+  window.location.href=`mailto:${empfaenger}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(mailBody)}`;
+}
+
+neuesFormular();
 </script>
 
 </body>
