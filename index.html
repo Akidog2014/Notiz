@@ -49,9 +49,11 @@ function neuesFormular() {
   div.className = 'person-form';
   div.innerHTML = `
 <h3>Person ${formIndex + 1}</h3>
+<label>Standort:<input type="text" name="standort" readonly></label>
 <label>Nachname:<input type="text" name="nachname" required></label>
 <label>Vorname:<input type="text" name="vorname" required></label>
 <label>Geburtsdatum:<input type="text" name="geburtsdatum" placeholder="DD.MM.JJJJ" inputmode="numeric" required oninput="formatDate(event)"></label>
+<label>Telefonnummer:<input type="tel" name="telefonnummer" required></label>
 
 <button type="button" onclick="zeigeWeitereAngaben(this)">➕ Noch nicht erfasst im myAbi!</button>
 <div class="zusatzfelder">
@@ -66,6 +68,9 @@ function neuesFormular() {
 <label>Heimatort:<input type="text" name="heimatort"></label>
 <label>Beruf:<input type="text" name="beruf"></label>
 </div>
+
+<label>Notizen:</label>
+<textarea name="notizen" rows="4"></textarea>
 
 <button type="button" onclick="zeigeAussagenFeld(this)">🗣️ Aussagen erfassen</button>
       <div class="aussage-hinweis">
@@ -84,11 +89,6 @@ function neuesFormular() {
 <label>Aussage:</label>
 <textarea name="aussage_text" placeholder="Aussage hier einfügen" rows="4"></textarea>
 </div>
-
-<label>Standort:<input type="text" name="standort" readonly></label>
-<label>Telefonnummer:<input type="tel" name="telefonnummer" required></label>
-<label>Notizen:</label>
-<textarea name="notizen" rows="4"></textarea>
 
 <button type="button" onclick="zeigeFinanzVerhaeltnisse(this)">💰 Finanz. Verhältnisse</button>
 <div class="finanzfelder">
